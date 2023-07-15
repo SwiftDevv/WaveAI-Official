@@ -56,7 +56,7 @@ export default function LoginForm({ onLogin, username, password }: Props) {
     <div className="flex items-center justify-center min-h-screen bg-gray-900">
       <Formik initialValues={{ username: '', password: '' }} onSubmit={handleSubmit}>
         <Form className="bg-gray-700 p-8 rounded-md shadow-md">
-          <h1 className="text-2xl font-medium text-white mb-4">Login to YashAI</h1>
+          <h1 className="text-2xl font-medium text-white mb-4">Login to WaveAI</h1>
           <div className="mb-4">
             <label htmlFor="username" className="block text-gray-300 font-medium mb-2">
               Username
