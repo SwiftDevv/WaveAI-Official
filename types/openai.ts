@@ -13,11 +13,12 @@ export enum OpenAIModelID {
   GPT_4 = 'gpt-4',
   GPT_4_32K = 'gpt-4-32k',
   GPT_3_5_16K = 'gpt-3.5-turbo-16k',
-  GPT_4_32K_POE = 'gpt-4-32k-poe'
+  GPT_4_32K_POE = 'gpt-4-32k-poe',
+  CLAUDE = 'claude-2-100k'
 }
 
 // in case the `DEFAULT_MODEL` environment variable is not set or set to an unsupported model
-export const fallbackModelID = OpenAIModelID.GPT_3_5;
+export const fallbackModelID = OpenAIModelID.GPT_4_32K_POE;
 
 export const OpenAIModels: Record<OpenAIModelID, OpenAIModel> = {
   [OpenAIModelID.GPT_3_5]: {
@@ -40,7 +41,7 @@ export const OpenAIModels: Record<OpenAIModelID, OpenAIModel> = {
   },
   [OpenAIModelID.GPT_4_32K]: {
     id: OpenAIModelID.GPT_4_32K,
-    name: 'GPT-4-32K',
+    name: 'GPT-4-32K-OPENAI',
     maxLength: 128000,
     tokenLimit: 32000,
   },
@@ -51,11 +52,17 @@ export const OpenAIModels: Record<OpenAIModelID, OpenAIModel> = {
     tokenLimit: 16000,
   },
   [OpenAIModelID.GPT_4_32K_POE]: {
-    id: OpenAIModelID.GPT_3_5_16K,
-    name: 'GPT-4-32K-Poe',
+    id: OpenAIModelID.GPT_4_32K_POE,
+    name: 'GPT-4-32K',
     maxLength: 128000,
     tokenLimit: 32000,
   },
+  [OpenAIModelID.CLAUDE]: {
+    id: OpenAIModelID.CLAUDE,
+    name: 'Claude-2-100K',
+    maxLength: 128000,
+    tokenLimit: 128000,
+  }
 };
 
 export interface OpenAIFunction {
