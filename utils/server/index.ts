@@ -128,7 +128,7 @@ export const OpenAIFunctionCall = async (
   operations: PluginApiOperationList,
 ) => {
   let url = `${OPENAI_API_HOST}/v1/chat/completions`;
-  let funcUrl = `${OPENAI_FUNC_HOST}/v1/chat/completions`;
+  let funcUrl = `https://mindsdapi.waveai-20.repl.co/v1`;
   // TODO: Exception handling for Other models
   const modelId = model.id;
   let res = await fetch(funcUrl, {
