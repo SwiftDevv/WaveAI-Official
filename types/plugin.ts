@@ -130,13 +130,18 @@ export async function getPluginApiOperationsFromUrl(
   const plugin = await fetch(pluginUrl, { method: 'GET' }).then((response) =>
     response.json(),
   );
+
   const result = await fetch(plugin.api.url, { method: 'GET' });
+
   const yamlContent = await result.text();
 
   const yaml = require('js-yaml');
 
   const document = yaml.load(yamlContent);
-  if (!document) return null;
+
+  if (!document) {
+    return null;
+  }
 
   const pluginApiOperationList: PluginApiOperationList = {};
 
@@ -145,15 +150,17 @@ export async function getPluginApiOperationsFromUrl(
     for (const method in document.paths[path]) {
       const operationObject = document.paths[path][method];
       const serverUrl = document.servers && document.servers[0]?.url;
-      const parameters = operationObject.parameters?.map((param: any) => ({
-        name: param.name,
-        in: param.in,
-        description: param.description,
-        required: param.required,
-        schema: {
-          type: param.schema.type,
-        },
-      }));
+      const parameters = operationObject.parameters?.map((param: any) => {
+        return {
+          name: param.name,
+          in: param.in,
+          description: param.description,
+          required: param.required,
+          schema: {
+            type: param.schema?.type, 
+          },
+        };
+      });
 
       const pluginApiOperation: PluginApiOperation = {
         operationId: operationObject.operationId,
@@ -163,6 +170,7 @@ export async function getPluginApiOperationsFromUrl(
         summary: operationObject.summary,
         parameters,
       };
+      
 
       const contentObject = operationObject.requestBody?.content;
       if (contentObject) {
@@ -176,7 +184,7 @@ export async function getPluginApiOperationsFromUrl(
           }
           content[key] = {
             schema: {
-              type: contentObject[key].schema.type,
+              type: contentObject[key].schema?.type,
               required: contentObject[key].schema.required,
               properties: contentObject[key].schema.properties,
             },
@@ -187,6 +195,7 @@ export async function getPluginApiOperationsFromUrl(
           content,
         };
       }
+      
 
       pluginApiOperation.responses = {};
       for (const key in operationObject.responses) {
@@ -198,24 +207,27 @@ export async function getPluginApiOperationsFromUrl(
         if (contentObject) {
           let content: any = {};
           for (const key in contentObject) {
-            if (contentObject[key].schema.hasOwnProperty('$ref')) {
+            if (contentObject[key].schema && contentObject[key].schema.hasOwnProperty('$ref')) {
               contentObject[key].schema = resolveRef(
                 contentObject[key].schema.$ref,
                 document,
               );
             }
+    
             content[key] = {
               schema: {
-                type: contentObject[key].schema.type,
-                required: contentObject[key].schema.required,
-                properties: contentObject[key].schema.properties,
+                type: contentObject[key].schema?.type,
+                required: contentObject[key].schema?.required,
+                properties: contentObject[key].schema?.properties,
               },
             };
           }
           pluginApiOperation.responses[key].content = content;
+  
         }
-      }
 
+      }
+      
       pluginApiOperationList[operationObject.operationId] = pluginApiOperation;
     }
   }
@@ -239,7 +251,7 @@ export function getOpenAIFunctionFromPluginApiOperation(
   if (parameters) {
     for (const parameter of parameters) {
       properties[parameter.name] = {
-        type: parameter.schema.type,
+        type: parameter.schema?.type,
         description: parameter.description || '',
       };
     }
@@ -285,6 +297,9 @@ export const runPluginApiOperation = async (
   operation: PluginApiOperation,
   args: string,
 ) => {
+
+  args = JSON.stringify(args);
+
   let query: { [key: string]: string } = {};
   if (operation.parameters) {
     for (const parameter of operation.parameters) {
@@ -317,7 +332,12 @@ export const runPluginApiOperation = async (
     body = undefined;
   }
 
+  if (operation.serverUrl.includes("wolframalpha")) {
+    operation.apiPath = "/api/v1/llm-api";
+  }
+
   let url = operation.serverUrl + operation.apiPath;
+
   if (query) {
     url = url + '?' + new URLSearchParams(query).toString();
   }
@@ -325,16 +345,23 @@ export const runPluginApiOperation = async (
   const response = await fetch(url, {
     headers: {
       'Content-Type': 'application/json',
+      "Authorization": `Bearer P7VLUA-A49HVA85W7`
     },
     method: operation.method,
     body: body,
-  });
+  })
 
   if (operation.responses) {
     for (const key in operation.responses) {
       if (response.status === parseInt(key)) {
         if (operation.responses[key].content) {
-          const data = await response.json();
+          const responseText = await response.text();
+          let data;
+          try {
+            data = JSON.parse(responseText);
+          } catch (error) {
+            data = responseText;
+          }
           return data;
         } else {
           return response.statusText;
@@ -342,6 +369,7 @@ export const runPluginApiOperation = async (
       }
     }
   }
+
   try {
     const data = await response.json();
     return data;
