@@ -3,7 +3,7 @@ import { OpenAIModel } from '@/types/openai';
 import { PluginApiOperationList, runPluginApiOperation } from '@/types/plugin';
 import { OpenAIFunctionList } from '@/types/openai';
 
-import { AZURE_DEPLOYMENT_ID, OPENAI_API_HOST, OPENAI_API_TYPE, OPENAI_API_VERSION, OPENAI_ORGANIZATION } from '../app/const';
+import { AZURE_DEPLOYMENT_ID, OPENAI_API_HOST, OPENAI_API_TYPE, OPENAI_API_VERSION, OPENAI_ORGANIZATION, OPENAI_FUNC_HOST } from '../app/const';
 
 import {
   ParsedEvent,
@@ -128,9 +128,10 @@ export const OpenAIFunctionCall = async (
   operations: PluginApiOperationList,
 ) => {
   let url = `${OPENAI_API_HOST}/v1/chat/completions`;
+  let funcUrl = `${OPENAI_FUNC_HOST}/v1/chat/completions`;
   // TODO: Exception handling for Other models
   const modelId = model.id;
-  let res = await fetch(url, {
+  let res = await fetch(funcUrl, {
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${key ? key : process.env.OPENAI_API_KEY}`
@@ -190,16 +191,15 @@ export const OpenAIFunctionCall = async (
 
     if (operation) {
       const result = await runPluginApiOperation(operation, message.function_call.arguments);
-      content = JSON.stringify(result);
+
+      content = typeof result === 'string' ? result : JSON.stringify(result);
     }
 
     secondMessages = [
       ...secondMessages,
-      message,
       {
-        "role": "function",
-        "name": function_name,
-        "content": content,
+        "role": "system",
+        "content": "Answer the user's question based on the given information: " + content,
       },
     ]
   }
@@ -219,21 +219,12 @@ export const OpenAIFunctionCall = async (
   });
 
   if (res.status !== 200) {
-    const result = await res.json();
-    if (result.error) {
-      throw new OpenAIError(
-        result.error.message,
-        result.error.type,
-        result.error.param,
-        result.error.code,
-      );
-    } else {
-      throw new Error(
-        `OpenAI API returned an error: ${
-          decoder.decode(result?.value) || result.statusText
-        }`,
-      );
-    }
+    const result = await res.text();
+    throw new Error(
+      `OpenAI API returned an error: ${
+        result
+      }`,
+    );
   }
 
   const stream = new ReadableStream({
