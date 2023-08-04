@@ -19,3 +19,6 @@ export const OPENAI_ORGANIZATION =
 
 export const AZURE_DEPLOYMENT_ID =
   process.env.AZURE_DEPLOYMENT_ID || '';
+
+export const OPENAI_FUNC_HOST =
+  process.env.OPENAI_FUNC_HOST || '';
