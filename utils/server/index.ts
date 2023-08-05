@@ -258,4 +258,4 @@ export const OpenAIFunctionCall = async (
 
   return stream;
 };
-console.log(data)
+
