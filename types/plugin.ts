@@ -362,6 +362,7 @@ export const runPluginApiOperation = async (
           } catch (error) {
             data = responseText;
           }
+          console.log(data)
           return data;
         } else {
           return response.statusText;
