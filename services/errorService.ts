@@ -2,26 +2,17 @@ import { useMemo } from 'react';
 
 import { useTranslation } from 'next-i18next';
 
-import { ErrorMessage } from '@/types/error';
-
 const useErrorService = () => {
   const { t } = useTranslation('chat');
 
   return {
     getModelsError: useMemo(
       () => (error: any) => {
-        return !error
-          ? null
-          : ({
-              title: t(''),
-              code: error.status || 'unknown',
-              messageLines: error.statusText
-                ? ['']
-                : [
-                    t(''),
-                    t(''),
-                  ],
-            } as ErrorMessage);
+        if (!error) {
+          return null;
+        }
+        // Silent Fail: Do not return any error, hence no error message will be shown.
+        return null; 
       },
       [t],
     ),
