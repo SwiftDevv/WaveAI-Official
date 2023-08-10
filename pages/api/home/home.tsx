@@ -24,6 +24,7 @@ import {
 import { saveFolders } from '@/utils/app/folders';
 import { savePrompts } from '@/utils/app/prompts';
 import { getSettings } from '@/utils/app/settings';
+import { PRE_DEFINED_PLUGINS } from '@types/plugins';
 
 import { Conversation } from '@/types/chat';
 import { KeyValuePair } from '@/types/data';
@@ -98,6 +99,16 @@ const Home = ({
   useEffect(() => {
     dispatch({ field: 'modelError', value: getModelsError(error) });
   }, [dispatch, error, getModelsError]);
+
+  useEffect(() => {
+    const plugins = localStorage.getItem('plugins');
+
+    if (!plugins || plugins === '{}') {
+      localStorage.setItem('plugins', JSON.stringify(
+        PRE_DEFINED_PLUGINS
+      ));
+    }
+  })
 
   // FETCH MODELS ----------------------------------------------
 
