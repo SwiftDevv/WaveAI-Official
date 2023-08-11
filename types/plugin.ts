@@ -360,7 +360,7 @@ export const runPluginApiOperation = async (
 };
 
 export const PRE_DEFINED_PLUGINS = {
-  "Web Search": {
+  "web_search": {
   "id": "web_search",
   "name": "Web Search",
   "description": "Search for information from the internet",
