@@ -360,11 +360,26 @@ export const runPluginApiOperation = async (
 };
 
 export const PRE_DEFINED_PLUGINS = {
+  "Wolfram": {
+    "id": "Wolfram",
+    "name": "Wolfram",
+    "description": "Access computation, math, curated knowledge & real-time data through Wolfram|Alpha and Wolfram Language.",
+    "url": "https://www.wolframalpha.com/",
+    "logo": "https://www.wolframcdn.com/images/icons/Wolfram.png"
+  },
   "web_search": {
   "id": "web_search",
   "name": "Web Search",
   "description": "Search for information from the internet",
   "url": "https://websearch.plugsugar.com/.well-known/ai-plugin.json",
   "logo": "https://websearch.plugsugar.com/200x200.png"
+},
+  
+  "VideoCaptions": {
+  "id": "VideoCaptions",
+  "name": "Video Captions",
+  "description": "Converts YouTube video into Text. If totalSegments are more than 1, transcribe each portion of the video separately until the full video is transcribed.",
+  "url": "https://vcaption.maila.ai/.well-known/ai-plugin.json",
+  "logo": "https://vcaption.maila.ai/.well-known/logo.png"
 },
 }
